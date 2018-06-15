@@ -20,19 +20,34 @@ import org.artifactory.repo.RepoPath
 
 replication {
     beforeFileReplication { localRepoPath ->
-        SetMultimap<String, String> props = HashMultimap.create()
-        props.put("foo", "true")
-        List<RepoPath> found = searches.itemsByProperties(props,
-                                                          "libs-releases-local")
-        if (found.contains(localRepoPath)) {
-            log.info("Replicating file: ${localRepoPath.getPath()} as it has" +
+        // List of repos to filter. Any others will be unfiltered.
+        def reposToFilter = ["libs-releases-local"]
+        SetMultimap<String, String> propsToCheck = HashMultimap.create()
+        // List of properties to check. If any are set, the file will be replicated.
+        propsToCheck.put("foo", "true")
+
+        if (reposToFilter.contains(localRepoPath.repoKey)) {
+            def props = repositories.getProperties(localRepoPath)
+            // Check if any property matches.
+            def propMatch = false
+            props.each{ k, v ->
+                if propsToCheck.containsEntry(k, v) {
+                    propMatch = true
+                }
+            }
+            if (propMatch) {
+                log.info("Replicating file: ${localRepoPath.getPath()} as it has" +
                      " the right property")
-            skip = false
+                skip = false
+            } else {
+                log.info("Skipping replication of a file:" +
+                        " ${localRepoPath.getPath()} as it does not have the" +
+                         " right property")
+                skip = true
+            }
         } else {
-            log.info("Skipping replication of a file:" +
-                     " ${localRepoPath.getPath()} as it does not have the" +
-                     " right property")
-            skip = true
+            // Don't skip if we aren't filtering this repo.
+            skip = false
         }
     }
 }
