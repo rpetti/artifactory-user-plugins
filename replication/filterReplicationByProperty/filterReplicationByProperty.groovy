@@ -30,8 +30,8 @@ replication {
             def props = repositories.getProperties(localRepoPath)
             // Check if any property matches.
             def propMatch = false
-            props.each{ k, v ->
-                if (propsToCheck.containsEntry(k, v)) {
+            props.entries().each{ entry ->
+                if (propsToCheck.containsEntry(entry.key, entry.value)) {
                     propMatch = true
                 }
             }
