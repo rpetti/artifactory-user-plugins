@@ -31,7 +31,7 @@ replication {
             // Check if any property matches.
             def propMatch = false
             props.each{ k, v ->
-                if propsToCheck.containsEntry(k, v) {
+                if (propsToCheck.containsEntry(k, v)) {
                     propMatch = true
                 }
             }
