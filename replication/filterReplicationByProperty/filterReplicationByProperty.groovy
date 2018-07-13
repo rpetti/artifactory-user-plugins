@@ -17,13 +17,21 @@
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.SetMultimap
 import org.artifactory.repo.RepoPath
+import java.net.URI
 
 replication {
     beforeFileReplication { localRepoPath ->
         // List of repos to filter. Any others will be unfiltered.
         def reposToFilter = ["libs-releases-local"]
-        SetMultimap<String, String> propsToCheck = HashMultimap.create()
+
         // List of properties to check. If any are set, the file will be replicated.
+        SetMultimap<String, String> propsToCheck = HashMultimap.create()
+        //   Replicate to specific host
+        def targetHost = new URI(targetInfo.instanceUrl).getHost()
+        if (targetHost.startsWith("art01foo")) {
+            propsToCheck.put("replicate-to-art01foo", "true")
+        }
+        //   Replicate everywhere
         propsToCheck.put("foo", "true")
 
         if (reposToFilter.contains(localRepoPath.repoKey)) {
